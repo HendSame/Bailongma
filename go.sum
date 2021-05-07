@@ -1,2 +1,4 @@
-github.com/taosdata/driver-go v0.0.0-20210415143420-d99751356e28 h1:u4fLvfxxFiYhE34Nu+NTIKeVMczWN1aQK1Kxr3yQi80=
-github.com/taosdata/driver-go v0.0.0-20210415143420-d99751356e28/go.mod h1:zcrRatLSD5tBg8arF2RFHvfawKa30gxDGikC/7zNPrI=
+github.com/emirpasic/gods v1.12.0 h1:QAUIPSaCu4G+POclxeqb3F+WPpdKqFGlw36+yOzGlrg=
+github.com/emirpasic/gods v1.12.0/go.mod h1:YfzfFFoVP/catgzJb4IKIqXjX78Ha8FMSDh3ymbK86o=
+github.com/taosdata/driver-go v0.0.0-20210427081935-7a26c432f8b4 h1:LokgUBPaH6ADDT3qdccCqz3xLjYFif4hl41YBXJagQU=
+github.com/taosdata/driver-go v0.0.0-20210427081935-7a26c432f8b4/go.mod h1:zcrRatLSD5tBg8arF2RFHvfawKa30gxDGikC/7zNPrI=
