@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/prompb"
+	"reflect"
 	"strings"
 	"time"
 )
@@ -67,7 +68,7 @@ func (p *ReaderProcessor) Process(req *prompb.ReadRequest) (*prompb.ReadResponse
 			var a interface{}
 			cache[index] = &a
 		}
-
+		defer rows.Close()
 		for rows.Next() {
 			var (
 				value    float64
@@ -80,22 +81,35 @@ func (p *ReaderProcessor) Process(req *prompb.ReadRequest) (*prompb.ReadResponse
 			}
 
 			row := make(map[string]string)
+			labelsName :=""
 			//set data
 			for i, data := range cache {
+				var t = *data.(*interface{})
 				if columns[i] == "ts" {
 					timeStr := (*data.(*interface{})).(string)
-					dataTime, err = time.Parse("2006-01-02 15:04:05.000", timeStr)
+					//dataTime, err = time.Parse("2006-01-02 15:04:05.000", timeStr)
+					dataTime, err = time.ParseInLocation("2006-01-02 15:04:05.000", timeStr,time.Local)
 					if err != nil {
 						continue
 					}
 				} else if columns[i] == "value" {
-					value = (*data.(*interface{})).(float64)
+					if t==nil {
+						value = 0.0
+					}else {
+						value = (*data.(*interface{})).(float64)
+					}
 				} else if columns[i] != "taghash" {
-					row[columns[i]] = (*data.(*interface{})).(string)
+					if t!=nil {
+						name := (*data.(*interface{})).(string)
+						row[columns[i]] = name
+						labelsName = labelsName+"_"+name
+					}else {
+						labelsName = labelsName+"_"+""
+					}
 				}
 			}
 
-			ts, ok := labelsToSeries[tableName]
+			ts, ok := labelsToSeries[labelsName]
 			if !ok {
 				labelPairs := make([]*prompb.Label, 0, columnLength-2)
 				labelPairs = append(labelPairs, &prompb.Label{
@@ -117,13 +131,14 @@ func (p *ReaderProcessor) Process(req *prompb.ReadRequest) (*prompb.ReadResponse
 					Labels:  labelPairs,
 					Samples: make([]prompb.Sample, 0, 100),
 				}
-				labelsToSeries[tableName] = ts
+				labelsToSeries[labelsName] = ts
 			}
 
 			ts.Samples = append(ts.Samples, prompb.Sample{
 				Timestamp: dataTime.UnixNano() / 1000000,
 				Value:     value,
 			})
+
 		}
 
 		err = rows.Err()
@@ -131,7 +146,6 @@ func (p *ReaderProcessor) Process(req *prompb.ReadRequest) (*prompb.ReadResponse
 			return nil, err
 		}
 
-		rows.Close()
 	}
 
 	resp := prompb.ReadResponse{
@@ -147,6 +161,28 @@ func (p *ReaderProcessor) Process(req *prompb.ReadRequest) (*prompb.ReadResponse
 	}
 	log.InfoLogger.Printf("Returned response #timeseries: %d\n", len(labelsToSeries))
 	return &resp, nil
+}
+
+func IsNil(i interface{}) bool {
+	//vi := reflect.ValueOf(i)
+	//if vi.Kind() == reflect.Ptr {
+	//	return vi.IsNil()
+	//}
+	//return false
+	ret := i == nil
+	if !ret {
+		vi := reflect.ValueOf(i)
+		kind := vi.Kind()
+		if kind == reflect.Slice ||
+			kind == reflect.Map ||
+			kind == reflect.Chan ||
+			kind == reflect.Interface ||
+			kind == reflect.Func ||
+			kind == reflect.Ptr {
+			return vi.IsNil()
+		}
+	}
+	return ret
 }
 
 func buildCommand(q *prompb.Query) (string, string, error) {
@@ -231,6 +267,16 @@ func anchorValue(str string) string {
 	if str[l-1] == '$' {
 		str = strings.Replace(str, "$", "", 1)
 		return fmt.Sprintf("%s", "%"+str)
+	}
+
+	if strings.HasPrefix(str,".*"){
+		str = strings.Replace(str, ".*", "", 1)
+		return fmt.Sprintf("%s", "%"+str)
+	}
+
+	if strings.HasSuffix(str,".*") {
+		str = strings.Replace(str, ".*", "", 1)
+		return fmt.Sprintf("%s%", str)
 	}
 
 	return fmt.Sprintf("%s%", "%"+str)
