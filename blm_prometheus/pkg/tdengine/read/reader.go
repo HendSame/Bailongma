@@ -102,6 +102,9 @@ func (p *ReaderProcessor) Process(req *prompb.ReadRequest) (*prompb.ReadResponse
 					if t!=nil {
 						name := (*data.(*interface{})).(string)
 						row[columns[i]] = name
+						fmt.Print(columns[i])
+						fmt.Print(name)
+						fmt.Println()
 						labelsName = labelsName+"_"+name
 					}else {
 						labelsName = labelsName+"_"+""
