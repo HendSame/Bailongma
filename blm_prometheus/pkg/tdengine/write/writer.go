@@ -356,7 +356,7 @@ func serializeTDengine(m *prompb.TimeSeries, tbn string, db *sql.DB) error {
 	vl := m.Samples[0].GetValue()
 	vls := strconv.FormatFloat(vl, 'E', -1, 64)
 
-	if vls == "NaN" {
+	if vls == "NaN" || vls == "-Inf" || vls == "+Inf"{
 		vls = "null"
 	}
 	tl := m.Samples[0].GetTimestamp()
