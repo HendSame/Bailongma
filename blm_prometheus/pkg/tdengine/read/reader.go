@@ -54,7 +54,7 @@ func (p *ReaderProcessor) Process(req *prompb.ReadRequest) (*prompb.ReadResponse
 		if err != nil {
 			return nil, err
 		}
-
+		defer rows.Close()
 		columns, err := rows.Columns()
 		if err != nil {
 			return nil, err
@@ -68,7 +68,7 @@ func (p *ReaderProcessor) Process(req *prompb.ReadRequest) (*prompb.ReadResponse
 			var a interface{}
 			cache[index] = &a
 		}
-		defer rows.Close()
+
 		for rows.Next() {
 			var (
 				value    float64

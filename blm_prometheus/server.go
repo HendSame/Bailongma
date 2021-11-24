@@ -188,7 +188,7 @@ func writeHandle() http.Handler {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		r.Body.Close()
+		defer r.Body.Close()
 		reqBuf, err := snappy.Decode(nil, compressed)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -316,7 +316,7 @@ func processBatches(workerId int) {
 		for {
 			if err != nil && count > 0 {
 				<-time.After(time.Second * 1)
-				_, err = sql.Open(taosDriverName, write.DbUser+":"+write.DbPassword+"@/tcp("+write.DaemonIP+")/"+write.DbName)
+				db, err = sql.Open(taosDriverName, write.DbUser+":"+write.DbPassword+"@/tcp("+write.DaemonIP+")/"+write.DbName)
 				count--
 			} else {
 				if err != nil {
