@@ -341,20 +341,20 @@ func processBatches(workerId int) {
 			_, err := db.Exec(strings.Join(sqlcmd, ""))
 			if err != nil {
 				logger.ErrorLogger.Printf("processBatches error %s\n", err)
-				var count int = 2
-				for {
-					if err != nil && count > 0 {
-						<-time.After(time.Second * 1)
-						_, err = db.Exec(strings.Join(sqlcmd, ""))
-						count--
-					} else {
-						if err != nil {
-							logger.ErrorLogger.Printf("Error: %s sqlcmd: %s\n", err, strings.Join(sqlcmd, ""))
-						}
-						break
-					}
-
-				}
+				//var count int = 2
+				//for {
+				//	if err != nil && count > 0 {
+				//		<-time.After(time.Second * 1)
+				//		_, err = db.Exec(strings.Join(sqlcmd, ""))
+				//		count--
+				//	} else {
+				//		if err != nil {
+				//			logger.ErrorLogger.Printf("Error: %s sqlcmd: %s\n", err, strings.Join(sqlcmd, ""))
+				//		}
+				//		break
+				//	}
+				//
+				//}
 			}
 		}
 	}
@@ -362,19 +362,19 @@ func processBatches(workerId int) {
 		i = 1
 		_, err := db.Exec(strings.Join(sqlcmd, ""))
 		if err != nil {
-			var count int = 2
-			for {
-				if err != nil && count > 0 {
-					<-time.After(time.Second * 1)
-					_, err = db.Exec(strings.Join(sqlcmd, ""))
-					count--
-				} else {
-					if err != nil {
+			//var count int = 2
+			//for {
+			//	if err != nil && count > 0 {
+			//		<-time.After(time.Second * 1)
+			//		_, err = db.Exec(strings.Join(sqlcmd, ""))
+			//		count--
+			//	} else {
+			//		if err != nil {
 						logger.ErrorLogger.Printf("Error: %s sqlcmd: %s\n", err, strings.Join(sqlcmd, ""))
-					}
-					break
-				}
-			}
+			//		}
+			//		break
+			//	}
+			//}
 		}
 	}
 
